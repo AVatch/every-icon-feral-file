@@ -1,5 +1,18 @@
 <section class="p-4">
-  <app-icon-grid [state]="test" (appSelect)="onSelect($event)"></app-icon-grid>
+  <div class="flex">
+    <div class="flex-1 p-4">
+      <app-icon-grid
+        [state]="state$ | async"
+        [restrictTo]="[23, 24, 25]"
+        (appSelect)="onSelect($event)"
+      ></app-icon-grid>
+    </div>
+    <div class="flex-1 p-4">
+      <button class="p-2 bg-gray-200" (click)="onRandomizeState()">
+        Randomize
+      </button>
+    </div>
+  </div>
 
   <router-outlet></router-outlet>
 </section>

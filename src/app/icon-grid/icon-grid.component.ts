@@ -17,15 +17,21 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IconGridComponent implements OnInit {
-  @Input() state: number[] = [];
+  @Input() state: number[] | null = null;
+  @Input() restrictTo: number[] | null = null;
+
   @Output() appSelect: EventEmitter<number> = new EventEmitter();
+
+  get ready(): boolean {
+    return this.state !== null;
+  }
 
   get grid(): number[][] {
     let _grid: number[][] = [];
 
     const chunkSize = 32;
-    for (let i = 0; i < this.state.length; i += chunkSize) {
-      _grid = [..._grid, this.state.slice(i, i + chunkSize)];
+    for (let i = 0; i < (this.state || []).length; i += chunkSize) {
+      _grid = [..._grid, (this.state || []).slice(i, i + chunkSize)];
     }
 
     return _grid;
@@ -39,10 +45,23 @@ export class IconGridComponent implements OnInit {
 
   onSelect(i: number) {
     // check if allowed
+    if (!this.canSelect(i)) {
+      return;
+    }
 
     this.appSelect.emit(i);
   }
+
+  canSelect(i: number): boolean {
+    if (this.restrictTo === null) {
+      return true;
+    }
+
+    return this.restrictTo.includes(i);
+  }
 }
+
+// TODO: Enable sketch
 
 // ngAfterViewInit(): void {
 //   // this.configure();
