@@ -1,7 +1,17 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-  <label for="code">Code: </label>
-  <input id="code" type="text" formControlName="code" />
-  <button type="submit">Submit</button>
-</form>
+  <div class="flex items-center">
+    <div class="flex flex-col">
+      <label for="count">Access Code: </label>
+      <input
+        id="code"
+        type="text"
+        formControlName="code"
+        class="border border-solid border-grey p-2"
+      />
+    </div>
 
-<!-- PIEbOdvZz7JBTmn2XReh -->
+    <span class="flex-1"></span>
+
+    <button class="p-2 bg-gray-200 h-fit" type="submit">Submit</button>
+  </div>
+</form>

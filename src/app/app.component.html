@@ -10,7 +10,12 @@
     <div class="flex-1 p-4">
       <ng-container [ngSwitch]="role$ | async">
         <ng-container *ngSwitchCase="'admin'">
-          <app-admin-controls></app-admin-controls>
+          <app-admin-controls
+            [interactable]="interactable$ | async"
+            (appRandomize)="onRandomizeState()"
+            (appSetInteractable)="onSetInteractable($event)"
+            (appSetParticipants)="onSetParticipants($event)"
+          ></app-admin-controls>
         </ng-container>
         <ng-container *ngSwitchCase="'participant'">
           <app-participant-controls></app-participant-controls>
@@ -27,6 +32,8 @@
 
 <ng-container *ngIf="hasSession$ | async">
   <section class="p-8">
-    <button (click)="onEndSession()">End Session</button>
+    <button class="p-2 bg-gray-200 h-fit" (click)="onEndSession()">
+      End Session
+    </button>
   </section>
 </ng-container>

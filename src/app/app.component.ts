@@ -8,12 +8,14 @@ import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
   onSnapshot,
   updateDoc,
   increment,
 } from 'firebase/firestore';
 
-import { Observable, Subject } from 'rxjs';
+import { Subject, combineLatest } from 'rxjs';
+import { take, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -25,12 +27,15 @@ export class AppComponent {
 
   title = 'every-icon';
 
-  sessionId: String | null = null;
+  pieceId: string = 'icon';
+
+  sessionId: string | null = null;
   hasSession$: Subject<boolean> = new Subject();
   role$: Subject<'admin' | 'participant' | 'viewer'> = new Subject();
 
   state$: Subject<number[] | null> = new Subject();
   restrictTo$: Subject<number[] | null> = new Subject();
+  interactable$: Subject<boolean | null> = new Subject();
 
   // -------------------------------
 
@@ -44,6 +49,7 @@ export class AppComponent {
         this.subscribeToSession();
         this.subscribeToState();
         this.subscribeToRestrictedTo();
+        this.subscribeToInteractable();
 
         this.resolveParams();
       });
@@ -58,7 +64,7 @@ export class AppComponent {
   }
 
   subscribeToState() {
-    onSnapshot(doc(getFirestore(), 'state', 'icon'), (snapshot) => {
+    onSnapshot(doc(getFirestore(), 'state', this.pieceId), (snapshot) => {
       if (!snapshot.exists()) {
         this.state$.next(null);
         return;
@@ -77,6 +83,17 @@ export class AppComponent {
   }
 
   subscribeToRestrictedTo() {}
+
+  subscribeToInteractable() {
+    onSnapshot(
+      doc(getFirestore(), 'interactable', this.pieceId),
+      (snapshot) => {
+        this.interactable$.next(snapshot.data()?.value ?? false);
+      }
+    );
+
+    this.interactable$.subscribe((i) => console.log('i:tick', { i }));
+  }
 
   // -------------------------------
 
@@ -131,9 +148,54 @@ export class AppComponent {
 
   // -------------------------------
 
+  onRandomizeState(n: number = 1024) {
+    this.role$
+      .pipe(
+        take(1),
+        filter((role) => ['admin'].includes(role))
+      )
+      .subscribe((_) => {
+        let newState = new Array(n)
+          .fill(0)
+          .map((_) => (Math.random() > 0.5 ? 1 : 0))
+          .reduce((acc, curr, i) => ({ ...acc, [i]: curr }), {});
+
+        setDoc(doc(getFirestore(), 'state', this.pieceId), newState);
+      });
+  }
+
+  async onSetInteractable(interactable: boolean) {
+    console.log('onSetInteractable', { interactable });
+
+    try {
+      await setDoc(doc(getFirestore(), 'interactable', this.pieceId), {
+        value: interactable,
+      });
+      console.log('done');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  onSetParticipants(n: number = 30) {}
+
+  // -------------------------------
+
   onSelect(i: number) {
-    updateDoc(doc(getFirestore(), 'state', 'icon'), {
-      [i.toString()]: increment(1),
-    });
+    combineLatest([this.role$, this.interactable$])
+      .pipe(
+        take(1),
+        filter(
+          ([role, interactable]) =>
+            interactable != null &&
+            interactable &&
+            ['participant'].includes(role)
+        )
+      )
+      .subscribe((_) => {
+        updateDoc(doc(getFirestore(), 'state', this.pieceId), {
+          [i.toString()]: increment(1),
+        });
+      });
   }
 }

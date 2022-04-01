@@ -4,8 +4,40 @@
   <hr class="my-4" />
 
   <div class="my-4">
-    <button class="p-2 bg-gray-200" (click)="onRandomizeState()">
-      Randomize
+    <button
+      class="w-full h-full bg-gray-200 p-2"
+      (click)="appSetInteractable.emit(false)"
+    >
+      {{ interactable ? "Stop Interactions" : "Start Interactions" }}
     </button>
   </div>
+
+  <div class="my-4">
+    <button class="w-full h-full bg-gray-200 p-2" (click)="appRandomize.emit()">
+      Randomize Icon State
+    </button>
+  </div>
+
+  <hr class="my-4" />
+
+  <!-- <div class="my-4">
+    <form>
+      <div class="flex items-center">
+        <div class="flex flex-col">
+          <label for="count">Participant Count: </label>
+          <input
+            id="count"
+            type="number"
+            formControlName="count"
+            placeholder="12"
+            class="border border-solid border-grey p-2"
+          />
+        </div>
+
+        <span class="flex-1"></span>
+
+        <button class="p-2 bg-gray-200 h-fit" type="submit">Create</button>
+      </div>
+    </form>
+  </div> -->
 </div>
