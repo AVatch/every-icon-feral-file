@@ -3,11 +3,13 @@
     <div class="row" style="display: flex">
       <ng-container *ngFor="let item of row; index as j">
         <div
+          class="cursor-pointer"
           [ngClass]="{
             'bg-black': item == 1,
             'bg-white': item == 0
           }"
           style="width: 15px; height: 15px; margin: 0.5px"
+          (click)="onSelect(i * 32 + j)"
         ></div>
       </ng-container>
     </div>

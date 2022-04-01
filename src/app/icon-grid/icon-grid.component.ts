@@ -16,10 +16,9 @@ import {
   styleUrls: ['./icon-grid.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IconGridComponent implements OnInit, AfterViewInit {
-  // canvas?: p5;
-
+export class IconGridComponent implements OnInit {
   @Input() state: number[] = [];
+  @Output() appSelect: EventEmitter<number> = new EventEmitter();
 
   get grid(): number[][] {
     let _grid: number[][] = [];
@@ -38,32 +37,38 @@ export class IconGridComponent implements OnInit, AfterViewInit {
     console.log(this.state);
   }
 
-  ngAfterViewInit(): void {
-    // this.configure();
+  onSelect(i: number) {
+    // check if allowed
+
+    this.appSelect.emit(i);
   }
-
-  // private configure() {
-  //   const sketch = (s: any) => {
-  //     s.preload = () => {};
-
-  //     s.setup = () => {
-  //       let c = s.createCanvas(512, 512);
-  //       c.parent('sketch-holder');
-  //       c.background(200);
-
-  //       // displayIcon = new Icon(0, 2, 0);
-  //     };
-
-  //     s.draw = () => {};
-
-  //     s.mouseReleased = () => {};
-
-  //     s.keyPressed = () => {};
-  //   };
-
-  //   this.canvas = new p5(sketch);
-  // }
 }
+
+// ngAfterViewInit(): void {
+//   // this.configure();
+// }
+
+// private configure() {
+//   const sketch = (s: any) => {
+//     s.preload = () => {};
+
+//     s.setup = () => {
+//       let c = s.createCanvas(512, 512);
+//       c.parent('sketch-holder');
+//       c.background(200);
+
+//       // displayIcon = new Icon(0, 2, 0);
+//     };
+
+//     s.draw = () => {};
+
+//     s.mouseReleased = () => {};
+
+//     s.keyPressed = () => {};
+//   };
+
+//   this.canvas = new p5(sketch);
+// }
 
 // class Icon {
 //   id: number;

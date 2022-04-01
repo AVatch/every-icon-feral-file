@@ -1,5 +1,5 @@
 <section class="p-4">
-  <app-icon-grid [state]="test"></app-icon-grid>
+  <app-icon-grid [state]="test" (appSelect)="onSelect($event)"></app-icon-grid>
 
   <router-outlet></router-outlet>
 </section>

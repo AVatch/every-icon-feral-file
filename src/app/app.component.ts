@@ -18,4 +18,8 @@ export class AppComponent {
   constructor() {
     const app = initializeApp(environment.firebase);
   }
+
+  onSelect(i: number) {
+    this.test[i] = this.test[i] === 0 ? 1 : 0;
+  }
 }
