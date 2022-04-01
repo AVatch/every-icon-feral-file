@@ -1,0 +1,15 @@
+<div style="background: grey; width: fit-content">
+  <ng-container *ngFor="let row of grid; index as i">
+    <div class="row" style="display: flex">
+      <ng-container *ngFor="let item of row; index as j">
+        <div
+          [ngClass]="{
+            'bg-black': item == 1,
+            'bg-white': item == 0
+          }"
+          style="width: 15px; height: 15px; margin: 0.5px"
+        ></div>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>
