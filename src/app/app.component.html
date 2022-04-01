@@ -23,6 +23,10 @@
       </ng-container>
     </div>
   </div>
-
-  <router-outlet></router-outlet>
 </section>
+
+<ng-container *ngIf="hasSession$ | async">
+  <section class="p-8">
+    <button (click)="onEndSession()">End Session</button>
+  </section>
+</ng-container>

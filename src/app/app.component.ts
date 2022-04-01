@@ -13,7 +13,7 @@ import {
   increment,
 } from 'firebase/firestore';
 
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +26,7 @@ export class AppComponent {
   title = 'every-icon';
 
   sessionId: String | null = null;
+  hasSession$: Subject<boolean> = new Subject();
   role$: Subject<'admin' | 'participant' | 'viewer'> = new Subject();
 
   state$: Subject<number[] | null> = new Subject();
@@ -40,6 +41,7 @@ export class AppComponent {
     getAuth()
       .signOut()
       .finally(() => {
+        this.subscribeToSession();
         this.subscribeToState();
         this.subscribeToRestrictedTo();
 
@@ -49,22 +51,15 @@ export class AppComponent {
 
   // -------------------------------
 
-  subscribeToRole() {
+  subscribeToSession() {
     getAuth().onAuthStateChanged((user) => {
-      console.log('onAuthStateChanged', { user });
-      if (user == null) {
-        this.role$.next('viewer');
-        return;
-      }
-
-      console.log('has session', user.uid);
+      this.hasSession$.next(user !== null);
     });
   }
 
   subscribeToState() {
     onSnapshot(doc(getFirestore(), 'state', 'icon'), (snapshot) => {
       if (!snapshot.exists()) {
-        // this.state = null;
         this.state$.next(null);
         return;
       }
@@ -126,7 +121,12 @@ export class AppComponent {
   }
 
   async onEndSession() {
-    this.role$.next('viewer');
+    try {
+      await getAuth().signOut();
+      this.role$.next('viewer');
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   // -------------------------------
