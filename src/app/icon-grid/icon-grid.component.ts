@@ -53,11 +53,7 @@ export class IconGridComponent implements OnInit {
   }
 
   canSelect(i: number): boolean {
-    if (this.restrictTo === null) {
-      return true;
-    }
-
-    return this.restrictTo.includes(i);
+    return (this.restrictTo || []).includes(i);
   }
 }
 

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,8 +13,17 @@ import { LoginComponent } from './login/login.component';
 import { AdminControlsComponent } from './admin-controls/admin-controls.component';
 
 @NgModule({
-  declarations: [AppComponent, IconGridComponent, StateControlsComponent, AccessControlsComponent, ParticipantControlsComponent, ViewerControlsComponent, LoginComponent, AdminControlsComponent],
-  imports: [BrowserModule, AppRoutingModule],
+  declarations: [
+    AppComponent,
+    IconGridComponent,
+    StateControlsComponent,
+    AccessControlsComponent,
+    ParticipantControlsComponent,
+    ViewerControlsComponent,
+    LoginComponent,
+    AdminControlsComponent,
+  ],
+  imports: [BrowserModule, ReactiveFormsModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent],
 })
