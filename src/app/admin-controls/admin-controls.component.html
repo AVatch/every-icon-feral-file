@@ -6,7 +6,7 @@
   <div class="my-4">
     <button
       class="w-full h-full bg-gray-200 p-2"
-      (click)="appSetInteractable.emit(false)"
+      (click)="appSetInteractable.emit(!interactable)"
     >
       {{ interactable ? "Stop Interactions" : "Start Interactions" }}
     </button>
