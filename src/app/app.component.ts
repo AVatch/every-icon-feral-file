@@ -9,7 +9,6 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  setDoc,
   updateDoc,
   increment,
 } from 'firebase/firestore';
@@ -52,6 +51,7 @@ export class AppComponent {
 
   subscribeToRole() {
     getAuth().onAuthStateChanged((user) => {
+      console.log('onAuthStateChanged', { user });
       if (user == null) {
         this.role$.next('viewer');
         return;
@@ -97,8 +97,6 @@ export class AppComponent {
   // -------------------------------
 
   async onStartSession(code: string) {
-    console.log({ code });
-
     // 1. check if valid code
     const ref = doc(getFirestore(), 'sessions', code);
     const snapshot = await getDoc(ref);
@@ -107,7 +105,8 @@ export class AppComponent {
       this.role$.next('viewer');
 
       // raise alert
-      alert("Sorry, that's not valid.");
+      alert("Sorry, that's not a valid code.");
+
       return;
     }
 
@@ -117,8 +116,13 @@ export class AppComponent {
     const data = snapshot.data();
     const isAdmin = data?.isAdmin || false;
 
-    await signInAnonymously(getAuth());
-    this.role$.next(isAdmin ? 'admin' : 'participant');
+    try {
+      await signInAnonymously(getAuth());
+      this.role$.next(isAdmin ? 'admin' : 'participant');
+    } catch (err) {
+      console.error(err);
+      this.role$.next('viewer');
+    }
   }
 
   async onEndSession() {
@@ -131,14 +135,5 @@ export class AppComponent {
     updateDoc(doc(getFirestore(), 'state', 'icon'), {
       [i.toString()]: increment(1),
     });
-  }
-
-  onRandomizeState(n: number = 1024) {
-    let newState = new Array(n)
-      .fill(0)
-      .map((_) => (Math.random() > 0.5 ? 1 : 0))
-      .reduce((acc, curr, i) => ({ ...acc, [i]: curr }), {});
-
-    setDoc(doc(getFirestore(), 'state', 'icon'), newState);
   }
 }
