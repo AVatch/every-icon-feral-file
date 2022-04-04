@@ -19,7 +19,7 @@ import {
 } from 'firebase/firestore';
 
 import { combineLatest, BehaviorSubject } from 'rxjs';
-import { take, filter, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { take, filter, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +34,7 @@ export class AppComponent {
   pieceId: string = 'icon';
 
   sessionId: string | null = null;
+
   hasSession$: BehaviorSubject<boolean> = new BehaviorSubject(false as boolean);
   role$: BehaviorSubject<'admin' | 'participant' | 'viewer'> =
     new BehaviorSubject('viewer' as 'admin' | 'participant' | 'viewer');
@@ -151,8 +152,6 @@ export class AppComponent {
           (session) => session.id !== this.sessionId
         );
 
-        console.log({ mySession });
-
         this.session$.next(mySession ?? null);
         this.sessions$.next(otherSessions);
       });
@@ -203,7 +202,12 @@ export class AppComponent {
   async onEndSession() {
     try {
       await getAuth().signOut();
+      this.hasSession$.next(false);
       this.role$.next('viewer');
+      this.session$.next(null);
+      this.sessions$.next(null);
+      this.restrictTo$.next(null);
+      this.interactable$.next(false);
     } catch (err) {
       console.error(err);
     }
@@ -301,7 +305,21 @@ export class AppComponent {
             ['participant'].includes(role)
         )
       )
-      .subscribe((_) => {
+      .subscribe(async (_) => {
+        if (this.sessionId === null) {
+          this.onEndSession();
+          return;
+        }
+
+        // redundantly check your session
+        const ref = doc(getFirestore(), 'sessions', this.sessionId);
+        const snapshot = await getDoc(ref);
+
+        if (!snapshot.exists()) {
+          this.onEndSession();
+          return;
+        }
+
         updateDoc(doc(getFirestore(), 'state', this.pieceId), {
           [i.toString()]: increment(1),
         });

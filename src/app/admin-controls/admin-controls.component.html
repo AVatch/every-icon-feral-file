@@ -23,7 +23,7 @@
   <ng-container *ngIf="(sessions?.length || 0) === 0; else sessionList">
     <div class="my-4">
       <form [formGroup]="formGroup" (ngSubmit)="onCreateSessions()">
-        <div class="flex items-center">
+        <div class="flex items-end">
           <div class="flex flex-col">
             <label for="count">Participant Count: </label>
             <input
