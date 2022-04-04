@@ -18,8 +18,8 @@ import {
   collection,
 } from 'firebase/firestore';
 
-import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
-import { take, filter, distinctUntilChanged } from 'rxjs/operators';
+import { combineLatest, BehaviorSubject } from 'rxjs';
+import { take, filter, switchMap, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -41,14 +41,14 @@ export class AppComponent {
   session$: BehaviorSubject<{
     id: string;
     isAdmin: boolean;
-    restrictedTo: number[];
+    restrictTo: number[];
   } | null> = new BehaviorSubject(
-    null as { id: string; isAdmin: boolean; restrictedTo: number[] } | null
+    null as { id: string; isAdmin: boolean; restrictTo: number[] } | null
   );
   sessions$: BehaviorSubject<
-    { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
+    { id: string; isAdmin: boolean; restrictTo: number[] }[] | null
   > = new BehaviorSubject(
-    null as { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
+    null as { id: string; isAdmin: boolean; restrictTo: number[] }[] | null
   );
 
   state$: BehaviorSubject<number[] | null> = new BehaviorSubject(
@@ -68,9 +68,8 @@ export class AppComponent {
     getAuth()
       .signOut()
       .finally(() => {
-        this.subscribeToSession();
+        this.subscribeToAuthStateChanged();
         this.subscribeToInteractable();
-        this.subscribeToRestrictedTo();
         this.subscribeToState();
 
         this.resolveParams();
@@ -81,7 +80,7 @@ export class AppComponent {
 
   // -------------------------------
 
-  subscribeToSession() {
+  subscribeToAuthStateChanged() {
     getAuth().onAuthStateChanged((user) => {
       this.hasSession$.next(user !== null);
       if (user === null) {
@@ -110,8 +109,6 @@ export class AppComponent {
     });
   }
 
-  subscribeToRestrictedTo() {}
-
   subscribeToInteractable() {
     onSnapshot(
       doc(getFirestore(), 'interactable', this.pieceId),
@@ -130,8 +127,6 @@ export class AppComponent {
         distinctUntilChanged()
       )
       .subscribe(async (_) => {
-        console.log('ping');
-
         if (this.sessionId === null) {
           return;
         }
@@ -147,7 +142,7 @@ export class AppComponent {
               ({ ...s.data(), id: s.id } as {
                 id: string;
                 isAdmin: boolean;
-                restrictedTo: number[];
+                restrictTo: number[];
               })
           );
 
@@ -156,7 +151,8 @@ export class AppComponent {
           (session) => session.id !== this.sessionId
         );
 
-        console.log({ mySession, otherSessions });
+        console.log({ mySession });
+
         this.session$.next(mySession ?? null);
         this.sessions$.next(otherSessions);
       });
@@ -270,15 +266,15 @@ export class AppComponent {
           const id = doc(collection(db, `/sessions`)).id;
           const ref = doc(db, `/sessions`, id);
 
-          let restrictedTo: number[] = [];
+          let restrictTo: number[] = [];
 
           Array.from(Array(perN)).forEach((_) => {
             let i = Math.floor(Math.random() * availableIndices.length);
-            restrictedTo.push(availableIndices[i]);
+            restrictTo.push(availableIndices[i]);
             availableIndices.splice(i, 1);
           });
 
-          batch.set(ref, { isAdmin: false, restrictedTo });
+          batch.set(ref, { isAdmin: false, restrictTo });
         });
 
         // Commit the batch

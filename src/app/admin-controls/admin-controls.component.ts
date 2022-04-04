@@ -23,7 +23,7 @@ export class AdminControlsComponent implements OnInit {
     | {
         id: string;
         isAdmin: boolean;
-        restrictedTo: number[];
+        restrictTo: number[];
       }[]
     | null = [];
 
