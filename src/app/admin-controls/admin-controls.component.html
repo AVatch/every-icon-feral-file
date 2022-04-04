@@ -1,5 +1,5 @@
 <div>
-  <h3 class="my-4">Admin Controls</h3>
+  <h3 class="my-4 font-bold">Admin Controls</h3>
 
   <hr class="my-4" />
 
@@ -22,7 +22,7 @@
 
   <ng-container *ngIf="(sessions?.length || 0) === 0; else sessionList">
     <div class="my-4">
-      <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+      <form [formGroup]="formGroup" (ngSubmit)="onCreateSessions()">
         <div class="flex items-center">
           <div class="flex flex-col">
             <label for="count">Participant Count: </label>
@@ -44,13 +44,24 @@
   </ng-container>
   <ng-template #sessionList>
     <div class="">
+      <h5 class="my-4 font-bold">Sessions</h5>
       <ul>
         <ng-container
           *ngFor="let session of sessions; index as i; first as isFirst"
         >
-          <li>{{ session.id }}</li>
+          <li>
+            <input
+              class="border border-solid border-grey p-1 m-2 w-full"
+              readonly
+              [value]="parseLink(session.id)"
+            />
+          </li>
         </ng-container>
       </ul>
+
+      <button class="my-2 p-2 bg-gray-200 h-fit" (click)="onResetSessions()">
+        Reset All Sessions
+      </button>
     </div>
   </ng-template>
 </div>

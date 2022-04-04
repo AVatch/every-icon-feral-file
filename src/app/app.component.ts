@@ -70,10 +70,12 @@ export class AppComponent {
       .finally(() => {
         this.subscribeToSession();
         this.subscribeToInteractable();
-        this.fetchSessions();
         this.subscribeToRestrictedTo();
         this.subscribeToState();
+
         this.resolveParams();
+
+        this.fetchSessions();
       });
   }
 

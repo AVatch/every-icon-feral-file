@@ -7,6 +7,8 @@ import {
   EventEmitter,
 } from '@angular/core';
 
+import { Router } from '@angular/router';
+
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -37,11 +39,11 @@ export class AdminControlsComponent implements OnInit {
     ]),
   });
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {}
 
-  onSubmit() {
+  onCreateSessions() {
     if (!this.formGroup.valid) {
       this.raiseAlert();
       return;
@@ -50,6 +52,14 @@ export class AdminControlsComponent implements OnInit {
     let count = this.formGroup.value.count;
 
     this.appSetParticipants.emit(count);
+  }
+
+  onResetSessions() {
+    this.appSetParticipants.emit(0);
+  }
+
+  parseLink(id: string) {
+    return `${window.location.origin}?key=${id}`;
   }
 
   raiseAlert(message: String = 'not valid') {
