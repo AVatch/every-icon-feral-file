@@ -19,7 +19,8 @@
           ></app-admin-controls>
         </ng-container>
         <ng-container *ngSwitchCase="'participant'">
-          <app-participant-controls> </app-participant-controls>
+          <app-participant-controls [interactable]="interactable$ | async">
+          </app-participant-controls>
         </ng-container>
         <ng-container *ngSwitchDefault>
           <app-viewer-controls
