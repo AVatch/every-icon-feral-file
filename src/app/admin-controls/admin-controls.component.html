@@ -20,34 +20,37 @@
 
   <hr class="my-4" />
 
-  <!-- <div class="my-4">
-    <form>
-      <div class="flex items-center">
-        <div class="flex flex-col">
-          <label for="count">Participant Count: </label>
-          <input
-            id="count"
-            type="number"
-            formControlName="count"
-            placeholder="12"
-            class="border border-solid border-grey p-2"
-          />
+  <ng-container *ngIf="(sessions?.length || 0) === 0; else sessionList">
+    <div class="my-4">
+      <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <div class="flex items-center">
+          <div class="flex flex-col">
+            <label for="count">Participant Count: </label>
+            <input
+              id="count"
+              type="number"
+              formControlName="count"
+              placeholder="12"
+              class="border border-solid border-grey p-2"
+            />
+          </div>
+
+          <span class="flex-1"></span>
+
+          <button class="p-2 bg-gray-200 h-fit" type="submit">Create</button>
         </div>
-
-        <span class="flex-1"></span>
-
-        <button class="p-2 bg-gray-200 h-fit" type="submit">Create</button>
-      </div>
-    </form>
-  </div> -->
-
-  <div class="">
-    <ul>
-      <ng-container
-        *ngFor="let session of sessions; index as i; first as isFirst"
-      >
-        <li>{{ session.id }}</li>
-      </ng-container>
-    </ul>
-  </div>
+      </form>
+    </div>
+  </ng-container>
+  <ng-template #sessionList>
+    <div class="">
+      <ul>
+        <ng-container
+          *ngFor="let session of sessions; index as i; first as isFirst"
+        >
+          <li>{{ session.id }}</li>
+        </ng-container>
+      </ul>
+    </div>
+  </ng-template>
 </div>

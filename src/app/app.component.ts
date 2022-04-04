@@ -14,6 +14,7 @@ import {
   onSnapshot,
   updateDoc,
   increment,
+  writeBatch,
   collection,
 } from 'firebase/firestore';
 
@@ -47,7 +48,7 @@ export class AppComponent {
   sessions$: BehaviorSubject<
     { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
   > = new BehaviorSubject(
-    [] as { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
+    null as { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
   );
 
   state$: BehaviorSubject<number[] | null> = new BehaviorSubject(
@@ -69,7 +70,7 @@ export class AppComponent {
       .finally(() => {
         this.subscribeToSession();
         this.subscribeToInteractable();
-        this.subscribeToSessions();
+        this.fetchSessions();
         this.subscribeToRestrictedTo();
         this.subscribeToState();
         this.resolveParams();
@@ -81,10 +82,46 @@ export class AppComponent {
   subscribeToSession() {
     getAuth().onAuthStateChanged((user) => {
       this.hasSession$.next(user !== null);
+      if (user === null) {
+        this.session$.next(null);
+        this.sessions$.next([]);
+      }
     });
   }
 
-  subscribeToSessions() {
+  subscribeToState() {
+    onSnapshot(doc(getFirestore(), 'state', this.pieceId), (snapshot) => {
+      if (!snapshot.exists()) {
+        this.state$.next(null);
+        return;
+      }
+
+      const data = snapshot.data();
+
+      const nextState = Object.keys(data)
+        .map((key) => ({ key: parseInt(key), value: data[key] }))
+        .sort((a, b) => a.key - b.key)
+        .map((pair) => pair.value)
+        .map((value) => value % 2);
+
+      this.state$.next(nextState);
+    });
+  }
+
+  subscribeToRestrictedTo() {}
+
+  subscribeToInteractable() {
+    onSnapshot(
+      doc(getFirestore(), 'interactable', this.pieceId),
+      (snapshot) => {
+        this.interactable$.next(snapshot.data()?.value ?? false);
+      }
+    );
+  }
+
+  // -------------------------------
+
+  fetchSessions() {
     this.hasSession$
       .pipe(
         filter((hasSession) => hasSession),
@@ -121,36 +158,6 @@ export class AppComponent {
         this.session$.next(mySession ?? null);
         this.sessions$.next(otherSessions);
       });
-  }
-
-  subscribeToState() {
-    onSnapshot(doc(getFirestore(), 'state', this.pieceId), (snapshot) => {
-      if (!snapshot.exists()) {
-        this.state$.next(null);
-        return;
-      }
-
-      const data = snapshot.data();
-
-      const nextState = Object.keys(data)
-        .map((key) => ({ key: parseInt(key), value: data[key] }))
-        .sort((a, b) => a.key - b.key)
-        .map((pair) => pair.value)
-        .map((value) => value % 2);
-
-      this.state$.next(nextState);
-    });
-  }
-
-  subscribeToRestrictedTo() {}
-
-  subscribeToInteractable() {
-    onSnapshot(
-      doc(getFirestore(), 'interactable', this.pieceId),
-      (snapshot) => {
-        this.interactable$.next(snapshot.data()?.value ?? false);
-      }
-    );
   }
 
   // -------------------------------
@@ -232,7 +239,40 @@ export class AppComponent {
     }
   }
 
-  onSetParticipants(n: number = 30) {}
+  onSetParticipants(n: number = 30) {
+    combineLatest([this.role$, this.sessions$])
+      .pipe(
+        take(1),
+        filter(([role]) => ['admin'].includes(role))
+      )
+      .subscribe(async ([_, sessions]) => {
+        // Get a new write batch
+        const db = getFirestore();
+        const batch = writeBatch(db);
+
+        // delete old sessions
+        (sessions || []).forEach((session) => {
+          const ref = doc(db, 'sessions', session.id);
+          batch.delete(ref);
+        });
+
+        // create new ones
+        Array.from(Array(n)).forEach((_) => {
+          const id = doc(collection(db, `/sessions`)).id;
+          const ref = doc(db, `/sessions`, id);
+          batch.set(ref, { isAdmin: false, restrictedTo: [] });
+        });
+
+        // Commit the batch
+        try {
+          await batch.commit();
+
+          this.fetchSessions();
+        } catch (err) {
+          console.error(err);
+        }
+      });
+  }
 
   // -------------------------------
 

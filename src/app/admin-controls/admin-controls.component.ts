@@ -40,4 +40,19 @@ export class AdminControlsComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}
+
+  onSubmit() {
+    if (!this.formGroup.valid) {
+      this.raiseAlert();
+      return;
+    }
+
+    let count = this.formGroup.value.count;
+
+    this.appSetParticipants.emit(count);
+  }
+
+  raiseAlert(message: String = 'not valid') {
+    alert(message);
+  }
 }
