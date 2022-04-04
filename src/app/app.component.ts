@@ -242,12 +242,12 @@ export class AppComponent {
   }
 
   onSetParticipants(n: number = 30) {
-    combineLatest([this.role$, this.sessions$])
+    combineLatest([this.role$, this.sessions$, this.state$])
       .pipe(
         take(1),
         filter(([role]) => ['admin'].includes(role))
       )
-      .subscribe(async ([_, sessions]) => {
+      .subscribe(async ([_, sessions, state]) => {
         // Get a new write batch
         const db = getFirestore();
         const batch = writeBatch(db);
@@ -258,11 +258,27 @@ export class AppComponent {
           batch.delete(ref);
         });
 
+        let availableIndices: number[] = [];
+        for (var i = 32; i <= 1023; i++) {
+          availableIndices.push(i);
+        }
+
+        let perN = Math.floor((32 * 31) / n);
+
         // create new ones
         Array.from(Array(n)).forEach((_) => {
           const id = doc(collection(db, `/sessions`)).id;
           const ref = doc(db, `/sessions`, id);
-          batch.set(ref, { isAdmin: false, restrictedTo: [] });
+
+          let restrictedTo: number[] = [];
+
+          Array.from(Array(perN)).forEach((_) => {
+            let i = Math.floor(Math.random() * availableIndices.length);
+            restrictedTo.push(availableIndices[i]);
+            availableIndices.splice(i, 1);
+          });
+
+          batch.set(ref, { isAdmin: false, restrictedTo });
         });
 
         // Commit the batch
