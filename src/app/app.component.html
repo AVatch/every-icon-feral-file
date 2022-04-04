@@ -26,14 +26,14 @@
           ></app-viewer-controls>
         </ng-container>
       </ng-container>
+
+      <ng-container *ngIf="hasSession$ | async">
+        <div class="flex justify-end">
+          <button class="p-2 bg-gray-200 h-fit" (click)="onEndSession()">
+            End Session
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </section>
-
-<ng-container *ngIf="hasSession$ | async">
-  <section class="p-8">
-    <button class="p-2 bg-gray-200 h-fit" (click)="onEndSession()">
-      End Session
-    </button>
-  </section>
-</ng-container>

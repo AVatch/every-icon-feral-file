@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from './../environments/environment';
 
@@ -14,8 +14,8 @@ import {
   increment,
 } from 'firebase/firestore';
 
-import { Subject, combineLatest } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
+import { take, filter, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -30,16 +30,24 @@ export class AppComponent {
   pieceId: string = 'icon';
 
   sessionId: string | null = null;
-  hasSession$: Subject<boolean> = new Subject();
-  role$: Subject<'admin' | 'participant' | 'viewer'> = new Subject();
+  hasSession$: BehaviorSubject<boolean> = new BehaviorSubject(false as boolean);
+  role$: BehaviorSubject<'admin' | 'participant' | 'viewer'> =
+    new BehaviorSubject('viewer' as 'admin' | 'participant' | 'viewer');
 
-  state$: Subject<number[] | null> = new Subject();
-  restrictTo$: Subject<number[] | null> = new Subject();
-  interactable$: Subject<boolean | null> = new Subject();
+  sessions$: BehaviorSubject<{ isAdmin: boolean; restrictedTo: number[] }[]> =
+    new BehaviorSubject([] as { isAdmin: boolean; restrictedTo: number[] }[]);
+
+  state$: BehaviorSubject<number[] | null> = new BehaviorSubject(
+    null as number[] | null
+  );
+  restrictTo$: BehaviorSubject<number[] | null> = new BehaviorSubject(
+    null as number[] | null
+  );
+  interactable$ = new BehaviorSubject(false);
 
   // -------------------------------
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private cd: ChangeDetectorRef) {
     this.app = initializeApp(environment.firebase);
 
     // clear session when starting
@@ -47,10 +55,10 @@ export class AppComponent {
       .signOut()
       .finally(() => {
         this.subscribeToSession();
-        this.subscribeToState();
-        this.subscribeToRestrictedTo();
         this.subscribeToInteractable();
-
+        this.subscribeToSessions();
+        this.subscribeToRestrictedTo();
+        this.subscribeToState();
         this.resolveParams();
       });
   }
@@ -61,6 +69,13 @@ export class AppComponent {
     getAuth().onAuthStateChanged((user) => {
       this.hasSession$.next(user !== null);
     });
+  }
+
+  subscribeToSessions() {
+    this.hasSession$.pipe(
+      filter((hasSession) => hasSession),
+      distinctUntilChanged()
+    );
   }
 
   subscribeToState() {
@@ -91,8 +106,6 @@ export class AppComponent {
         this.interactable$.next(snapshot.data()?.value ?? false);
       }
     );
-
-    this.interactable$.subscribe((i) => console.log('i:tick', { i }));
   }
 
   // -------------------------------
@@ -165,13 +178,10 @@ export class AppComponent {
   }
 
   async onSetInteractable(interactable: boolean) {
-    console.log('onSetInteractable', { interactable });
-
     try {
       await setDoc(doc(getFirestore(), 'interactable', this.pieceId), {
         value: interactable,
       });
-      console.log('done');
     } catch (err) {
       console.error(err);
     }

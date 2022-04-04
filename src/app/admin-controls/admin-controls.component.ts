@@ -16,7 +16,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminControlsComponent implements OnInit {
-  @Input() interactable: boolean | null = false;
+  @Input() interactable: boolean | null = null;
 
   @Output() appRandomize: EventEmitter<void> = new EventEmitter();
   @Output() appSetInteractable: EventEmitter<boolean> = new EventEmitter();
@@ -32,7 +32,5 @@ export class AdminControlsComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {
-    console.log(this.interactable);
-  }
+  ngOnInit(): void {}
 }
