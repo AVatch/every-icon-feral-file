@@ -67,28 +67,36 @@ export class IconGridComponent implements OnInit, OnDestroy {
       this._didInitSimulated = true;
     }
 
-    // let next = [...this.state.slice(this._pointer, 32 + 1)];
-    let next = [...this._simulated];
+    // setup buffer
+    let buffer = [...this._simulated];
 
-    if (next[0] === 1) {
-      next[0] = 0;
+    if (buffer.length < 1) {
+      return;
+    }
+
+    if (buffer[0] === 1) {
+      buffer[0] = 0;
     } else {
-      next[0] = 1;
+      buffer[0] = 1;
 
       let shouldCarry = true;
       let pointer = 1;
+
       while (shouldCarry) {
-        if (next[pointer] === 0) {
-          next[pointer] = 1;
+        if (buffer.length < pointer) {
+          pointer = 1;
+          shouldCarry = false;
+        } else if (buffer[pointer] === 0) {
+          buffer[pointer] = 1;
           pointer += 1;
         } else {
-          next[pointer] = 0;
+          buffer[pointer] = 0;
           shouldCarry = false;
         }
       }
     }
 
-    this._simulated = next;
+    this._simulated = buffer;
   }
 
   onSelect(i: number) {
