@@ -12,13 +12,14 @@
         <ng-container *ngSwitchCase="'admin'">
           <app-admin-controls
             [interactable]="interactable$ | async"
+            [sessions]="sessions$ | async"
             (appRandomize)="onRandomizeState()"
             (appSetInteractable)="onSetInteractable($event)"
             (appSetParticipants)="onSetParticipants($event)"
           ></app-admin-controls>
         </ng-container>
         <ng-container *ngSwitchCase="'participant'">
-          <app-participant-controls></app-participant-controls>
+          <app-participant-controls> </app-participant-controls>
         </ng-container>
         <ng-container *ngSwitchDefault>
           <app-viewer-controls

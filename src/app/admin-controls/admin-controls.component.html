@@ -40,4 +40,14 @@
       </div>
     </form>
   </div> -->
+
+  <div class="">
+    <ul>
+      <ng-container
+        *ngFor="let session of sessions; index as i; first as isFirst"
+      >
+        <li>{{ session.id }}</li>
+      </ng-container>
+    </ul>
+  </div>
 </div>

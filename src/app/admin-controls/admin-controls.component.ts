@@ -17,6 +17,13 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class AdminControlsComponent implements OnInit {
   @Input() interactable: boolean | null = null;
+  @Input() sessions:
+    | {
+        id: string;
+        isAdmin: boolean;
+        restrictedTo: number[];
+      }[]
+    | null = [];
 
   @Output() appRandomize: EventEmitter<void> = new EventEmitter();
   @Output() appSetInteractable: EventEmitter<boolean> = new EventEmitter();

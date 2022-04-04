@@ -7,11 +7,14 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 import {
   getFirestore,
   doc,
+  getDocs,
   getDoc,
   setDoc,
+  query,
   onSnapshot,
   updateDoc,
   increment,
+  collection,
 } from 'firebase/firestore';
 
 import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
@@ -34,8 +37,18 @@ export class AppComponent {
   role$: BehaviorSubject<'admin' | 'participant' | 'viewer'> =
     new BehaviorSubject('viewer' as 'admin' | 'participant' | 'viewer');
 
-  sessions$: BehaviorSubject<{ isAdmin: boolean; restrictedTo: number[] }[]> =
-    new BehaviorSubject([] as { isAdmin: boolean; restrictedTo: number[] }[]);
+  session$: BehaviorSubject<{
+    id: string;
+    isAdmin: boolean;
+    restrictedTo: number[];
+  } | null> = new BehaviorSubject(
+    null as { id: string; isAdmin: boolean; restrictedTo: number[] } | null
+  );
+  sessions$: BehaviorSubject<
+    { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
+  > = new BehaviorSubject(
+    [] as { id: string; isAdmin: boolean; restrictedTo: number[] }[] | null
+  );
 
   state$: BehaviorSubject<number[] | null> = new BehaviorSubject(
     null as number[] | null
@@ -72,10 +85,42 @@ export class AppComponent {
   }
 
   subscribeToSessions() {
-    this.hasSession$.pipe(
-      filter((hasSession) => hasSession),
-      distinctUntilChanged()
-    );
+    this.hasSession$
+      .pipe(
+        filter((hasSession) => hasSession),
+        distinctUntilChanged()
+      )
+      .subscribe(async (_) => {
+        console.log('ping');
+
+        if (this.sessionId === null) {
+          return;
+        }
+
+        const snapshot = await getDocs(
+          query(collection(getFirestore(), 'sessions'))
+        );
+
+        const data = snapshot.docs
+          .filter((s) => s.exists())
+          .map(
+            (s) =>
+              ({ ...s.data(), id: s.id } as {
+                id: string;
+                isAdmin: boolean;
+                restrictedTo: number[];
+              })
+          );
+
+        const mySession = data.find((session) => session.id === this.sessionId);
+        const otherSessions = data.filter(
+          (session) => session.id !== this.sessionId
+        );
+
+        console.log({ mySession, otherSessions });
+        this.session$.next(mySession ?? null);
+        this.sessions$.next(otherSessions);
+      });
   }
 
   subscribeToState() {
