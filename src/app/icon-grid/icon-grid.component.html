@@ -1,8 +1,14 @@
 <ng-container *ngIf="ready; else loader">
   <div style="width: fit-content">
-    <ng-container *ngFor="let row of grid; index as i">
+    <ng-container *ngFor="let row of grid; index as i; trackBy: rowTrackByFn">
       <div class="row" style="display: flex">
-        <ng-container *ngFor="let item of row; index as j">
+        <ng-container
+          *ngFor="
+            let item of i == 0 ? _simulated : row;
+            index as j;
+            trackBy: tileTrackByFn
+          "
+        >
           <div
             class="square"
             [ngClass]="{

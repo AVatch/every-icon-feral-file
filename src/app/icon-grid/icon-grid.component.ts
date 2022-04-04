@@ -1,8 +1,4 @@
-// import * as p5 from 'p5';
-
 import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   OnInit,
   Input,
@@ -17,7 +13,10 @@ import {
   styleUrls: ['./icon-grid.component.scss'],
 })
 export class IconGridComponent implements OnInit, OnDestroy {
-  _state: number[] | null = null;
+  _didInitSimulated: boolean = false;
+  _simulated: number[] = Array(32)
+    .fill(0)
+    .map((_) => (Math.random() > 0.5 ? 1 : 0));
 
   @Input() state: number[] | null = null;
   @Input() restrictTo: number[] | null = null;
@@ -25,24 +24,15 @@ export class IconGridComponent implements OnInit, OnDestroy {
   @Output() appSelect: EventEmitter<number> = new EventEmitter();
 
   get ready(): boolean {
-    return this._state !== null && this.state !== null;
-  }
-
-  get merged(): number[] {
-    let i = (this._state || []).findIndex((obj) => obj !== null);
-
-    return [
-      ...(this._state || []).slice(0, i + 1),
-      ...(this.state || []).slice(i + 1),
-    ];
+    return this.state !== null;
   }
 
   get grid(): number[][] {
     let _grid: number[][] = [];
 
     const chunkSize = 32;
-    for (let i = 0; i < this.merged.length; i += chunkSize) {
-      _grid = [..._grid, this.merged.slice(i, i + chunkSize)];
+    for (let i = 0; i < (this.state ?? []).length; i += chunkSize) {
+      _grid = [..._grid, (this.state ?? []).slice(i, i + chunkSize)];
     }
 
     return _grid;
@@ -51,7 +41,6 @@ export class IconGridComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit(): void {
-    this.setup();
     this.run();
   }
 
@@ -59,34 +48,47 @@ export class IconGridComponent implements OnInit, OnDestroy {
     window.clearInterval();
   }
 
-  setup() {
-    this._state = Array(1024).fill(null);
+  run() {
+    this.frame();
+    setInterval(() => {
+      this.frame();
+    }, 50);
+    // }, 1000);
   }
 
-  run() {
-    setInterval(() => {
-      if (
-        this._state === null ||
-        this.state === null ||
-        (this._state || []).length === 0 ||
-        (this.state || []).length === 0
-      ) {
-        return;
+  frame() {
+    if (this.state === null || (this.state || []).length === 0) {
+      return;
+    }
+
+    // init simulated
+    if (!this._didInitSimulated) {
+      this._simulated = [...this.state.slice(0, 32)];
+      this._didInitSimulated = true;
+    }
+
+    // let next = [...this.state.slice(this._pointer, 32 + 1)];
+    let next = [...this._simulated];
+
+    if (next[0] === 1) {
+      next[0] = 0;
+    } else {
+      next[0] = 1;
+
+      let shouldCarry = true;
+      let pointer = 1;
+      while (shouldCarry) {
+        if (next[pointer] === 0) {
+          next[pointer] = 1;
+          pointer += 1;
+        } else {
+          next[pointer] = 0;
+          shouldCarry = false;
+        }
       }
+    }
 
-      let updated = [...this._state];
-
-      if (updated[0] === null || updated[0] === 0) {
-        updated[0] = 1;
-      } else {
-        updated[0] = 0;
-
-        // TODO: do the weird loop
-      }
-
-      this._state = updated;
-      // }, 50);
-    }, 1000);
+    this._simulated = next;
   }
 
   onSelect(i: number) {
@@ -101,131 +103,12 @@ export class IconGridComponent implements OnInit, OnDestroy {
   canSelect(i: number): boolean {
     return (this.restrictTo || []).includes(i);
   }
+
+  tileTrackByFn(index: number, item: number): any {
+    return item;
+  }
+
+  rowTrackByFn(index: number, item: number[]): any {
+    return index;
+  }
 }
-
-// TODO: Enable sketch
-
-// ngAfterViewInit(): void {
-//   // this.configure();
-// }
-
-// private configure() {
-//   const sketch = (s: any) => {
-//     s.preload = () => {};
-
-//     s.setup = () => {
-//       let c = s.createCanvas(512, 512);
-//       c.parent('sketch-holder');
-//       c.background(200);
-
-//       // displayIcon = new Icon(0, 2, 0);
-//     };
-
-//     s.draw = () => {};
-
-//     s.mouseReleased = () => {};
-
-//     s.keyPressed = () => {};
-//   };
-
-//   this.canvas = new p5(sketch);
-// }
-
-// class Icon {
-//   id: number;
-
-//   size: number;
-//   w: number;
-//   h: number;
-
-//   x: number;
-//   y: number;
-
-//   state: number[] = [];
-
-//   canvas?: p5;
-
-//   constructor(options: {
-//     id: number;
-//     size: number;
-//     x: number;
-//     y: number;
-//     canvas: p5;
-//   }) {
-//     this.id = options.id;
-
-//     this.size = options.size;
-//     this.w = options.size / 2;
-//     this.h = options.size / 2;
-
-//     this.x = options.x;
-//     this.y = options.y;
-
-//     this.canvas = options.canvas;
-
-//     for (let m = 0; m < 1024; m++) {
-//       this.state[m] = 1;
-//     }
-//   }
-
-//   fillIcon(iconArray: number[]) {
-//     for (let i = 0; i < 1024; i++) {
-//       this.state[i] = iconArray[i];
-//     }
-//   }
-
-//   set_pixel(xpix: number, ypix: number) {
-//     if (this.state[ypix * this.size + xpix] == 1) {
-//       this.state[ypix * this.size + xpix] = 0;
-//     } else {
-//       this.state[ypix * this.size + xpix] = 1;
-//     }
-//   }
-
-//   Increment_Icon() {
-//     let carry_bit = 0;
-
-//     this.id = 1;
-
-//     if (this.state[0] == 1) {
-//       this.state[0] = 0;
-//     } else {
-//       this.state[0] = 1;
-
-//       carry_bit = 1;
-
-//       //Propogate numbers
-//       while (carry_bit == 1) {
-//         if (this.state[this.id] == 0) {
-//           //if the pixel i
-//           this.state[this.id] = 1;
-//           this.id++;
-//         } else {
-//           this.state[this.id] = 0;
-//           carry_bit = 0;
-//         }
-//       }
-//     }
-//   }
-
-//   paintIcon(x: number, y: number) {
-//     if (this.canvas === undefined) {
-//       return;
-//     }
-
-//     let temp_counter = 0;
-//     let m = 0;
-//     let n = 0;
-
-//     this.canvas.stroke(196);
-
-//     for (let i = 0; i < this.state.length; i++) {
-//       x = i % this.size;
-//       y = Math.floor(i / this.size);
-
-//       this.canvas
-//         .fill(this.state[i] == 0 ? 0 : 255)
-//         .rect(x * this.size, y * this.size, this.size, this.size);
-//     }
-//   }
-// }
