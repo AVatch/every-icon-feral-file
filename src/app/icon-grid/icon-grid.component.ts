@@ -8,30 +8,41 @@ import {
   Input,
   Output,
   EventEmitter,
+  OnDestroy,
 } from '@angular/core';
 
 @Component({
   selector: 'app-icon-grid',
   templateUrl: './icon-grid.component.html',
   styleUrls: ['./icon-grid.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IconGridComponent implements OnInit {
+export class IconGridComponent implements OnInit, OnDestroy {
+  _state: number[] | null = null;
+
   @Input() state: number[] | null = null;
   @Input() restrictTo: number[] | null = null;
 
   @Output() appSelect: EventEmitter<number> = new EventEmitter();
 
   get ready(): boolean {
-    return this.state !== null;
+    return this._state !== null && this.state !== null;
+  }
+
+  get merged(): number[] {
+    let i = (this._state || []).findIndex((obj) => obj !== null);
+
+    return [
+      ...(this._state || []).slice(0, i + 1),
+      ...(this.state || []).slice(i + 1),
+    ];
   }
 
   get grid(): number[][] {
     let _grid: number[][] = [];
 
     const chunkSize = 32;
-    for (let i = 0; i < (this.state || []).length; i += chunkSize) {
-      _grid = [..._grid, (this.state || []).slice(i, i + chunkSize)];
+    for (let i = 0; i < this.merged.length; i += chunkSize) {
+      _grid = [..._grid, this.merged.slice(i, i + chunkSize)];
     }
 
     return _grid;
@@ -40,7 +51,42 @@ export class IconGridComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    console.log(this.state);
+    this.setup();
+    this.run();
+  }
+
+  ngOnDestroy(): void {
+    window.clearInterval();
+  }
+
+  setup() {
+    this._state = Array(1024).fill(null);
+  }
+
+  run() {
+    setInterval(() => {
+      if (
+        this._state === null ||
+        this.state === null ||
+        (this._state || []).length === 0 ||
+        (this.state || []).length === 0
+      ) {
+        return;
+      }
+
+      let updated = [...this._state];
+
+      if (updated[0] === null || updated[0] === 0) {
+        updated[0] = 1;
+      } else {
+        updated[0] = 0;
+
+        // TODO: do the weird loop
+      }
+
+      this._state = updated;
+      // }, 50);
+    }, 1000);
   }
 
   onSelect(i: number) {

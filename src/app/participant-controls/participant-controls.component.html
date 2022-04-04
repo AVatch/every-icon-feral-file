@@ -3,5 +3,12 @@
 
   <hr class="my-4" />
 
-  <p>Icon is {{ interactable ? "interactable." : "not interactable." }}</p>
+  <p>
+    Icon is
+    {{
+      interactable
+        ? "interactable. Click on the red-outlined squares to toggle them."
+        : "not interactable."
+    }}
+  </p>
 </div>
