@@ -232,13 +232,32 @@ export class AppComponent {
   }
 
   async onSetInteractable(interactable: boolean) {
-    try {
-      await setDoc(doc(getFirestore(), 'interactable', this.pieceId), {
-        value: interactable,
+    this.role$
+      .pipe(
+        take(1),
+        filter((role) => ['admin'].includes(role))
+      )
+      .subscribe(async (_) => {
+        try {
+          await setDoc(doc(getFirestore(), 'interactable', this.pieceId), {
+            value: interactable,
+          });
+        } catch (err) {
+          console.error(err);
+        }
+
+        if (!interactable) {
+          this.state$.pipe(take(1)).subscribe((state) => {
+            let grid: number[][] = [];
+            const chunkSize = 32;
+            for (let i = 0; i < (state ?? []).length; i += chunkSize) {
+              grid = [...grid, (state ?? []).slice(i, i + chunkSize)];
+            }
+
+            console.log(grid);
+          });
+        }
       });
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   onSetParticipants(n: number = 30) {
