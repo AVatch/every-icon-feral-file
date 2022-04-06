@@ -14,6 +14,7 @@
             [interactable]="interactable$ | async"
             [sessions]="sessions$ | async"
             (appRandomize)="onRandomizeState()"
+            (appClear)="onClearState()"
             (appSetInteractable)="onSetInteractable($event)"
             (appSetParticipants)="onSetParticipants($event)"
             (appDump)="onDump()"

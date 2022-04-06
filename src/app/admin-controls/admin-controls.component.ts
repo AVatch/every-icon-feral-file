@@ -28,6 +28,7 @@ export class AdminControlsComponent implements OnInit {
     | null = [];
 
   @Output() appRandomize: EventEmitter<void> = new EventEmitter();
+  @Output() appClear: EventEmitter<void> = new EventEmitter();
   @Output() appSetInteractable: EventEmitter<boolean> = new EventEmitter();
   @Output() appSetParticipants: EventEmitter<number> = new EventEmitter();
   @Output() appDump: EventEmitter<void> = new EventEmitter();

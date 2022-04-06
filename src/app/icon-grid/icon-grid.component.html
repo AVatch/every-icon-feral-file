@@ -2,28 +2,65 @@
   <div style="width: fit-content">
     <ng-container *ngFor="let row of grid; index as i; trackBy: rowTrackByFn">
       <div class="row" style="display: flex">
-        <ng-container
-          *ngFor="
-            let item of i == 0 ? _simulated : row;
-            index as j;
-            trackBy: tileTrackByFn
-          "
-        >
-          <div
-            class="square"
-            [ngClass]="{
-              selectable: canSelect(i * 32 + j)
-            }"
-            (click)="onSelect(i * 32 + j)"
+        <ng-container *ngIf="i === 0">
+          <ng-container
+            *ngFor="let item of _simulated; index as j; trackBy: tileTrackByFn"
+          >
+            <div class="square">
+              <div
+                class="tile"
+                [ngClass]="{
+                  'bg-black': item == 1,
+                  'bg-white': item == 0
+                }"
+              ></div>
+            </div>
+          </ng-container>
+
+          <ng-container
+            *ngFor="
+              let item of row.slice(_simulated.length);
+              index as j;
+              trackBy: tileTrackByFn
+            "
           >
             <div
-              class="tile"
+              class="square"
               [ngClass]="{
-                'bg-black': item == 1,
-                'bg-white': item == 0
+                selectable: canSelect(i * 32 + _simulated.length + j)
               }"
-            ></div>
-          </div>
+              (click)="onSelect(i * 32 + _simulated.length + j)"
+            >
+              <div
+                class="tile"
+                [ngClass]="{
+                  'bg-black': item == 1,
+                  'bg-white': item == 0
+                }"
+              ></div>
+            </div>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="i !== 0">
+          <ng-container
+            *ngFor="let item of row; index as j; trackBy: tileTrackByFn"
+          >
+            <div
+              class="square"
+              [ngClass]="{
+                selectable: canSelect(i * 32 + j)
+              }"
+              (click)="onSelect(i * 32 + j)"
+            >
+              <div
+                class="tile"
+                [ngClass]="{
+                  'bg-black': item == 1,
+                  'bg-white': item == 0
+                }"
+              ></div>
+            </div>
+          </ng-container>
         </ng-container>
       </div>
     </ng-container>

@@ -231,6 +231,22 @@ export class AppComponent {
       });
   }
 
+  onClearState(n: number = 1024) {
+    this.role$
+      .pipe(
+        take(1),
+        filter((role) => ['admin'].includes(role))
+      )
+      .subscribe((_) => {
+        let newState = new Array(n)
+          .fill(0)
+          .map((_) => 0)
+          .reduce((acc, curr, i) => ({ ...acc, [i]: curr }), {});
+
+        setDoc(doc(getFirestore(), 'state', this.pieceId), newState);
+      });
+  }
+
   async onSetInteractable(interactable: boolean) {
     this.role$
       .pipe(

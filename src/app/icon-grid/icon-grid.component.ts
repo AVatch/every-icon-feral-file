@@ -14,7 +14,7 @@ import {
 })
 export class IconGridComponent implements OnInit, OnDestroy {
   _didInitSimulated: boolean = false;
-  _simulated: number[] = Array(32)
+  _simulated: number[] = Array(24)
     .fill(0)
     .map((_) => (Math.random() > 0.5 ? 1 : 0));
 
@@ -63,7 +63,7 @@ export class IconGridComponent implements OnInit, OnDestroy {
 
     // init simulated
     if (!this._didInitSimulated) {
-      this._simulated = [...this.state.slice(0, 32)];
+      this._simulated = [...this.state.slice(0, 24)];
       this._didInitSimulated = true;
     }
 
@@ -100,6 +100,7 @@ export class IconGridComponent implements OnInit, OnDestroy {
   }
 
   onSelect(i: number) {
+    console.log('onSelect', i);
     this.appSelect.emit(i);
   }
 
