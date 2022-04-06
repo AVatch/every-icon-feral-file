@@ -49,12 +49,8 @@
         <ng-container
           *ngFor="let session of sessions; index as i; first as isFirst"
         >
-          <li>
-            <input
-              class="border border-solid border-grey p-1 m-2 w-full"
-              readonly
-              [value]="parseLink(session.id)"
-            />
+          <li style="text-transform: none">
+            {{ parseLink(session.id) }}
           </li>
         </ng-container>
       </ul>

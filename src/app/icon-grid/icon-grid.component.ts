@@ -100,11 +100,6 @@ export class IconGridComponent implements OnInit, OnDestroy {
   }
 
   onSelect(i: number) {
-    // check if allowed
-    if (!this.canSelect(i)) {
-      return;
-    }
-
     this.appSelect.emit(i);
   }
 

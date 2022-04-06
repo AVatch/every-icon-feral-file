@@ -77,6 +77,8 @@ export class AppComponent {
 
         this.fetchSessions();
       });
+
+    this.session$.subscribe((p) => console.log(p));
   }
 
   // -------------------------------
@@ -161,7 +163,7 @@ export class AppComponent {
 
   resolveParams() {
     const qp = this.route.snapshot.queryParamMap;
-    const key = qp.get('key');
+    const key = qp.get('key') || qp.get('KEY');
 
     if (key && key !== undefined) {
       this.onStartSession(key);
@@ -175,6 +177,8 @@ export class AppComponent {
     const ref = doc(getFirestore(), 'sessions', code);
     const snapshot = await getDoc(ref);
 
+    console.log('onStartSession', { code });
+    console.log(snapshot.exists());
     if (!snapshot.exists()) {
       this.role$.next('viewer');
 
@@ -314,14 +318,16 @@ export class AppComponent {
   // -------------------------------
 
   onSelect(i: number) {
+    console.log('onselect', i);
     combineLatest([this.role$, this.interactable$])
       .pipe(
         take(1),
         filter(
           ([role, interactable]) =>
-            interactable != null &&
-            interactable &&
-            ['participant'].includes(role)
+            ['admin'].includes(role) ||
+            (interactable != null &&
+              interactable &&
+              ['participant'].includes(role))
         )
       )
       .subscribe(async (_) => {
