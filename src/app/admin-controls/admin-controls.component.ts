@@ -30,6 +30,7 @@ export class AdminControlsComponent implements OnInit {
   @Output() appRandomize: EventEmitter<void> = new EventEmitter();
   @Output() appSetInteractable: EventEmitter<boolean> = new EventEmitter();
   @Output() appSetParticipants: EventEmitter<number> = new EventEmitter();
+  @Output() appDump: EventEmitter<void> = new EventEmitter();
 
   formGroup = new FormGroup({
     count: new FormControl(0, [

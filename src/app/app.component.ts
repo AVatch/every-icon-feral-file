@@ -77,8 +77,6 @@ export class AppComponent {
 
         this.fetchSessions();
       });
-
-    this.session$.subscribe((p) => console.log(p));
   }
 
   // -------------------------------
@@ -177,8 +175,6 @@ export class AppComponent {
     const ref = doc(getFirestore(), 'sessions', code);
     const snapshot = await getDoc(ref);
 
-    console.log('onStartSession', { code });
-    console.log(snapshot.exists());
     if (!snapshot.exists()) {
       this.role$.next('viewer');
 
@@ -257,8 +253,6 @@ export class AppComponent {
             for (let i = 0; i < (state ?? []).length; i += chunkSize) {
               grid = [...grid, (state ?? []).slice(i, i + chunkSize)];
             }
-
-            console.log(grid);
           });
         }
       });
@@ -318,7 +312,6 @@ export class AppComponent {
   // -------------------------------
 
   onSelect(i: number) {
-    console.log('onselect', i);
     combineLatest([this.role$, this.interactable$])
       .pipe(
         take(1),
@@ -349,5 +342,42 @@ export class AppComponent {
           [i.toString()]: increment(1),
         });
       });
+  }
+
+  // -------------------------------
+
+  onDump() {
+    this.state$.pipe(take(1)).subscribe((state) => {
+      console.log({ state });
+
+      let grid: number[][] = [];
+
+      // break into chunks of 32
+      const chunkSize = 32;
+      for (let i = 0; i < (state ?? []).length; i += chunkSize) {
+        grid = [...grid, (state ?? []).slice(i, i + chunkSize)];
+      }
+
+      // iterate over rows
+      grid.forEach((row, i) => {
+        // flip
+        let flipped = row.reverse();
+        let c = 0;
+
+        const segmentSize = 4;
+
+        for (let j = 0; j < flipped.length; j += segmentSize) {
+          console.log(`row: ${i} segment: ${c}`);
+
+          let segment = flipped.slice(j, j + segmentSize);
+
+          segment.forEach((tile) => {
+            console.log(`\t${tile === 1 ? 'black' : 'white'}`);
+          });
+
+          c += 1;
+        }
+      });
+    });
   }
 }
