@@ -3,7 +3,7 @@
     <div class="flex-1 p-4">
       <app-icon-grid
         [state]="state$ | async"
-        [restrictTo]="(session$ | async)?.restrictTo || []"
+        [restrictTo]="restrictTo$ | async"
         (appSelect)="onSelect($event)"
       ></app-icon-grid>
     </div>
