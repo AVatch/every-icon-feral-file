@@ -2,6 +2,7 @@
   <div class="flex">
     <div class="flex-1 p-4">
       <app-icon-grid
+        [interactable]="interactable$ | async"
         [state]="state$ | async"
         [restrictTo]="(session$ | async)?.restrictTo || []"
         (appSelect)="onSelect($event)"

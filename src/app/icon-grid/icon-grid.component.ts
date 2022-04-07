@@ -18,6 +18,8 @@ export class IconGridComponent implements OnInit, OnDestroy {
     .fill(0)
     .map((_) => (Math.random() > 0.5 ? 1 : 0));
 
+  @Input() interactable: boolean | null = null;
+
   @Input() state: number[] | null = null;
   @Input() restrictTo: number[] | null = null;
 
@@ -105,7 +107,11 @@ export class IconGridComponent implements OnInit, OnDestroy {
   }
 
   canSelect(i: number): boolean {
-    return (this.restrictTo || []).includes(i);
+    return (
+      this.interactable != null &&
+      this.interactable &&
+      (this.restrictTo || []).includes(i)
+    );
   }
 
   tileTrackByFn(index: number, item: number): any {
