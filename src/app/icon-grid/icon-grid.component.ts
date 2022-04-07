@@ -74,10 +74,10 @@ export class IconGridComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (buffer[0] === 1) {
-      buffer[0] = 0;
-    } else {
+    if (buffer[0] === 0) {
       buffer[0] = 1;
+    } else {
+      buffer[0] = 0;
 
       let shouldCarry = true;
       let pointer = 1;
@@ -86,11 +86,11 @@ export class IconGridComponent implements OnInit, OnDestroy {
         if (buffer.length < pointer) {
           pointer = 1;
           shouldCarry = false;
-        } else if (buffer[pointer] === 0) {
-          buffer[pointer] = 1;
+        } else if (buffer[pointer] === 1) {
+          buffer[pointer] = 0;
           pointer += 1;
         } else {
-          buffer[pointer] = 0;
+          buffer[pointer] = 1;
           shouldCarry = false;
         }
       }
