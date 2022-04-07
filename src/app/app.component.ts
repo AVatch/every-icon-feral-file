@@ -334,9 +334,9 @@ export class AppComponent {
         filter(
           ([role, interactable]) =>
             ['admin'].includes(role) ||
-            (interactable != null &&
-              interactable &&
-              ['participant'].includes(role))
+            (['participant'].includes(role) &&
+              interactable != null &&
+              interactable)
         )
       )
       .subscribe(async (_) => {
@@ -354,9 +354,13 @@ export class AppComponent {
           return;
         }
 
-        updateDoc(doc(getFirestore(), 'state', this.pieceId), {
-          [i.toString()]: increment(1),
-        });
+        const data = snapshot.data();
+
+        if (data.isAdmin || data.restrictTo.includes(i)) {
+          updateDoc(doc(getFirestore(), 'state', this.pieceId), {
+            [i.toString()]: increment(1),
+          });
+        }
       });
   }
 
