@@ -292,11 +292,11 @@ export class AppComponent {
         });
 
         let availableIndices: number[] = [];
-        for (var i = 32; i <= 1023; i++) {
+        for (var i = 24; i < 1024; i++) {
           availableIndices.push(i);
         }
 
-        let perN = Math.floor((32 * 31) / n);
+        let perN = Math.floor((32 * 32) / n);
 
         // create new ones
         Array.from(Array(n)).forEach((_) => {
