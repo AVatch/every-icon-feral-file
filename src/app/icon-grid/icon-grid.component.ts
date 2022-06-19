@@ -102,7 +102,6 @@ export class IconGridComponent implements OnInit, OnDestroy {
   }
 
   onSelect(i: number) {
-    console.log('onSelect', i);
     this.appSelect.emit(i);
   }
 

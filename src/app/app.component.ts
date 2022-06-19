@@ -291,28 +291,34 @@ export class AppComponent {
           batch.delete(ref);
         });
 
-        let availableIndices: number[] = [];
-        for (var i = 24; i < 1024; i++) {
-          availableIndices.push(i);
-        }
+        // let availableIndices: number[] = [];
+        // for (var i = 24; i < 1024; i++) {
+        //   availableIndices.push(i);
+        // }
 
-        let perN = Math.floor((32 * 32) / n);
+        // let perN = Math.floor((32 * 32) / n);
 
         // create new ones
-        Array.from(Array(n)).forEach((_) => {
-          const id = doc(collection(db, `/sessions`)).id;
-          const ref = doc(db, `/sessions`, id);
+        // Array.from(Array(n)).forEach((_) => {
+        //   const id = doc(collection(db, `/sessions`)).id;
+        //   const ref = doc(db, `/sessions`, id);
 
-          let restrictTo: number[] = [];
+        //   let restrictTo: number[] = [];
 
-          Array.from(Array(perN)).forEach((_) => {
-            let i = Math.floor(Math.random() * availableIndices.length);
-            restrictTo.push(availableIndices[i]);
-            availableIndices.splice(i, 1);
-          });
+        //   Array.from(Array(perN)).forEach((_) => {
+        //     let i = Math.floor(Math.random() * availableIndices.length);
+        //     restrictTo.push(availableIndices[i]);
+        //     availableIndices.splice(i, 1);
+        //   });
 
-          batch.set(ref, { isAdmin: false, restrictTo });
-        });
+        //   console.log({ restrictTo });
+
+        //   batch.set(ref, { isAdmin: false, restrictTo });
+        // });
+
+        const id = doc(collection(db, `/sessions`)).id;
+        const ref = doc(db, `/sessions`, id);
+        batch.set(ref, { isAdmin: false, restrictTo: null });
 
         // Commit the batch
         try {
@@ -346,21 +352,21 @@ export class AppComponent {
         }
 
         // redundantly check your session
-        const ref = doc(getFirestore(), 'sessions', this.sessionId);
-        const snapshot = await getDoc(ref);
+        // const ref = doc(getFirestore(), 'sessions', this.sessionId);
+        // const snapshot = await getDoc(ref);
 
-        if (!snapshot.exists()) {
-          this.onEndSession();
-          return;
-        }
+        // if (!snapshot.exists()) {
+        //   this.onEndSession();
+        //   return;
+        // }
 
-        const data = snapshot.data();
+        // const data = snapshot.data();
 
-        if (data.isAdmin || data.restrictTo.includes(i)) {
-          updateDoc(doc(getFirestore(), 'state', this.pieceId), {
-            [i.toString()]: increment(1),
-          });
-        }
+        // if (data.isAdmin || data.restrictTo.includes(i)) {
+        updateDoc(doc(getFirestore(), 'state', this.pieceId), {
+          [i.toString()]: increment(1),
+        });
+        // }
       });
   }
 
@@ -392,7 +398,7 @@ export class AppComponent {
           let segment = flipped.slice(j, j + segmentSize);
 
           segment.forEach((tile) => {
-            console.log(`\t${tile === 1 ? 'black' : 'white'}`);
+            console.log(`\t${tile === 1 ? 'up' : 'down'}`);
           });
 
           c += 1;
